@@ -145,7 +145,7 @@ public class UIManager : MonoBehaviour
             if(currentTransform.childCount == 0)
             {
                 GameObject turret = Instantiate(TurretPrefab, currentTransform);
-                turret.GetComponent<Turret>().type = type;
+                //turret.GetComponent<Turret>().type = type;
                 break;
             }
         }
