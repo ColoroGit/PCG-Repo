@@ -32,8 +32,6 @@ public class Map
                 map[i][j] = Random.Range(0, 1);
             }
         }
-
-        this.singlePathWeight = singlePathWeight;
     }
 
     public float CalculateConnectionFitness()
