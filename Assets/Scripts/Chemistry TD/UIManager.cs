@@ -22,7 +22,6 @@ public class UIManager : MonoBehaviour
     int NaCounter;
     int ClCounter;
 
-
     [Header("Botones de uso")]
     [SerializeField] Button H2OButton; // HOO
     [SerializeField] Button CO2Button; // COO
@@ -136,17 +135,47 @@ public class UIManager : MonoBehaviour
         ClCounterText.text = ClCounter.ToString();
     }
 
+    public void InitializeCounters(Dictionary<string, int> elements)
+    {
+        foreach (KeyValuePair<string, int> element in elements)
+        {
+            switch (element.Key)
+            {
+                case "H":
+                    HCounter = element.Value;
+                    break;
+                case "O":
+                    OCounter = element.Value;
+                    break;
+                case "C":
+                    CCounter = element.Value;
+                    break;
+                case "N":
+                    NaCounter = element.Value;
+                    break;
+                case "B":
+                    ClCounter = element.Value;
+                    break;
+                default:
+                    Debug.Log("Elemento no reconocido");
+                    break;
+            }
+        }
+
+        UpdateElementsCounter();
+    }
+
     void PlaceTurret(string type)
     {
         Transform currentTransform = TurretSpots.transform;
 
-        for(int i = 0; i < currentTransform.childCount; i++)
+        foreach (Transform child in currentTransform)
         {
-            if(currentTransform.childCount == 0)
+            if (child.childCount == 0)
             {
-                GameObject turret = Instantiate(TurretPrefab, currentTransform);
-                //turret.GetComponent<Turret>().type = type;
-                break;
+                GameObject turret = Instantiate(TurretPrefab, child);
+                turret.GetComponent<Turret>().type = type;
+                return; 
             }
         }
     }

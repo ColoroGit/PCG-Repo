@@ -18,7 +18,7 @@ public class Turret : MonoBehaviour
         {
             shooting = StartCoroutine(Shoot());
         }
-        else
+        else if (shooting != null)
         {
             StopCoroutine(shooting);
             shooting = null;

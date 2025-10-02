@@ -7,7 +7,7 @@ public class TurretsManager : MonoBehaviour
     // B -> Cl
     // N -> Na
 
-    private List<string> turrets = new()
+    private List<string> turretsTypes = new()
     {
         "HHO",
         "COO",
@@ -17,16 +17,6 @@ public class TurretsManager : MonoBehaviour
         "CHHHH"
     };
 
-    private List<int> elementsAmount = new()
-    {
-        3,
-        3,
-        2,
-        2,
-        3,
-        5
-    };
-
     public static TurretsManager Instance;
 
     private void Awake()
@@ -34,12 +24,12 @@ public class TurretsManager : MonoBehaviour
         Instance = this;
     }
 
-    private int CalculateFitness(string turret, List<string> elementResistence)
+    private int CalculateFitness(string turret, string elementResistence)
     {
-        int index = turrets.IndexOf(turret);
+        int index = turretsTypes.IndexOf(turret);
         int fitness = 0;
 
-        foreach (string element in elementResistence)
+        foreach (char element in elementResistence)
         {
             if (!turret.Contains(element))
             {
@@ -73,13 +63,12 @@ public class TurretsManager : MonoBehaviour
         return sortedTurrets;
     }
 
-    public List<string> GetBestTurrets(List<string> elementResistence)
-    //public Dictionary<string, int> GetBestTurrets(List<string> elementResistence)
+    public List<string> GetBestTurrets(string elementResistence)
     {
         Debug.Log($"Element resistence: {elementResistence.ToString()}");
-        Dictionary<string, int> fitnessTurrets = new();
+        Dictionary<string, int> fitnessTurrets = new(); 
 
-        foreach (string turret in turrets)
+        foreach (string turret in turretsTypes)
         {
             int fitness = CalculateFitness(turret, elementResistence);
             fitnessTurrets.Add(turret, fitness);
@@ -92,7 +81,7 @@ public class TurretsManager : MonoBehaviour
         //return fitnessTurrets;
     }
 
-    public Dictionary<string, int> GetElementsAmount(Dictionary<string, GameObject> bestTurrets)
+    public Dictionary<string, int> GetElementsAmount(Dictionary<string, string> bestTurrets)
     {
         Dictionary<string, int> elementsAmount = new()
         {
