@@ -5,22 +5,22 @@ using UnityEngine;
 public class Puzzle : MonoBehaviour
 {
     [SerializeField] private UIManager ui;
+    [SerializeField] private VirusSpawnManager vsm;
 
     [SerializeField] private int virusAmount = 2;
 
 
     List<string> virusTypes = new()
     {
-        "HNB",
-        "HOC",
-        "ONB",
+        "H", "O", "C", "N", "B",
+        "HO", "HC", "HN", "HB", "OC", "ON", "OB", "CN", "CB", "NB",
+        "HOC", "HON", "HOB", "HCN", "HCB", "HNB",
+        "OCN", "OCB", "ONB",
         "CNB",
-        "CON",
-        "CB"
     };
 
     private List<string> selectedVirus;
-    private Dictionary<string, string> bestTurrets;
+    private List<string> bestTurrets;
     private Dictionary<string, int> elementsAmount;
 
     private void Start()
@@ -30,6 +30,9 @@ public class Puzzle : MonoBehaviour
         bestTurrets ??= new();
 
         // Random selection
+        // Change this for Hill Climbing (search for the most optimal virus combination based on the dificulty)
+        // For Hill climbing, we select a random set of virus, calculate their difficulty based on how much damage the best turrets can deal to them
+        // And to adjust and search a better set of virus that fits the given dificulty, the "movements" we do to traverse the solution space is to add, remove, or swap** an atom of the virus set
         for (int i = 0; i < virusAmount; i++)
         {
             int randomIndex = Random.Range(0, virusTypes.Count);
@@ -38,23 +41,74 @@ public class Puzzle : MonoBehaviour
             {
                 selectedVirus.Add(virusTypes[randomIndex]);
             }
+            else
+                i--;
         }
 
-        // Get best turrets
-        for (int i = 0; i < selectedVirus.Count; i++)
+        Debug.Log($"Selected virus: {string.Join(", ", selectedVirus)}");
+
+        bestTurrets = TurretsManager.Instance.GetBestTurrets(selectedVirus);
+
+        List<string> selectedBestTurrets = new();
+        for (int i = 0; i < virusAmount && i < bestTurrets.Count; i++)
         {
-            List<string> debugTurrets = TurretsManager.Instance.GetBestTurrets(selectedVirus[i]);
-            Debug.Log($"Best turret against {selectedVirus[i]} is {debugTurrets[0]}");
-            bestTurrets.Add(debugTurrets[0], selectedVirus[i]);
+            selectedBestTurrets.Add(bestTurrets[i]);
         }
 
         // Decompose turrets
-        elementsAmount = TurretsManager.Instance.GetElementsAmount(bestTurrets);
-
-        // Falta Agregarle otros átomos random que confundan
+        elementsAmount = TurretsManager.Instance.GetElementsAmount(selectedBestTurrets);
+        AddConfusingAtoms(selectedBestTurrets, 2, true);
 
         ui.InitializeCounters(elementsAmount);
+        vsm.StartRound(selectedVirus);
+    }
 
-        //Desde el VirusSpawnManager spawnear virus pasándole la lsita de virus seleccionada.
+    private void AddConfusingAtoms(List<string> selectedBestTurrets, int extraTurrets = 1, bool useLeastOptimal = true)
+    {
+        HashSet<string> usedTurrets = new(selectedBestTurrets);
+        List<string> candidateTurrets = new();
+
+        // Buscar torretas candidatas que no sean las óptimas ya seleccionadas
+        foreach (var virus in selectedVirus)
+        {
+            if (useLeastOptimal)
+            {
+                // Agregar la menos óptima (última de la lista)
+                if (bestTurrets.Count > 1)
+                {
+                    for (int i = bestTurrets.Count - 1; i >= 0; i--)
+                    {
+                        if (!usedTurrets.Contains(bestTurrets[i]))
+                        {
+                            candidateTurrets.Add(bestTurrets[i]);
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Agregar la más óptima que no esté ya usada
+                for (int i = selectedBestTurrets.Count - 1; i < bestTurrets.Count; i++)
+                {
+                    if (!usedTurrets.Contains(bestTurrets[i]))
+                    {
+                        candidateTurrets.Add(bestTurrets[i]);
+                        break;
+                    }
+                }
+            }
+        }
+
+        int added = 0;
+        foreach (string turret in candidateTurrets)
+        {
+            if (added >= extraTurrets) break;
+            foreach (char kvp in turret)
+            {
+                elementsAmount[kvp.ToString()]++;
+            }
+            added++;
+        }
     }
 }

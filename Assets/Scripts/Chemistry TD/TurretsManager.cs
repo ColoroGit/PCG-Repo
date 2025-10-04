@@ -24,16 +24,19 @@ public class TurretsManager : MonoBehaviour
         Instance = this;
     }
 
-    private int CalculateFitness(string turret, string elementResistence)
+    private int CalculateFitness(string turret, List<string> elementResistences)
     {
         int index = turretsTypes.IndexOf(turret);
         int fitness = 0;
 
-        foreach (char element in elementResistence)
+        foreach (string resistance in elementResistences)
         {
-            if (!turret.Contains(element))
+            foreach (char element in resistance)
             {
-                fitness++;
+                if (!turret.Contains(element))
+                {
+                    fitness++;
+                }
             }
         }
 
@@ -43,7 +46,6 @@ public class TurretsManager : MonoBehaviour
     }
 
     private List<string> SortFitnessTurrets(Dictionary<string, int> fitnessTurrets)
-    //private void SortFitnessTurrets(Dictionary<string, int> fitnessTurrets)
     {
         List<KeyValuePair<string, int>> sortedList = new(fitnessTurrets);
         sortedList.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
@@ -63,25 +65,21 @@ public class TurretsManager : MonoBehaviour
         return sortedTurrets;
     }
 
-    public List<string> GetBestTurrets(string elementResistence)
+    public List<string> GetBestTurrets(List<string> elementResistences)
     {
-        Debug.Log($"Element resistence: {elementResistence.ToString()}");
+        Debug.Log($"Element resistence: {elementResistences.ToString()}");
         Dictionary<string, int> fitnessTurrets = new(); 
 
         foreach (string turret in turretsTypes)
         {
-            int fitness = CalculateFitness(turret, elementResistence);
+            int fitness = CalculateFitness(turret, elementResistences);
             fitnessTurrets.Add(turret, fitness);
         }
 
         return SortFitnessTurrets(fitnessTurrets);
-
-        //SortFitnessTurrets(fitnessTurrets);
-
-        //return fitnessTurrets;
     }
 
-    public Dictionary<string, int> GetElementsAmount(Dictionary<string, string> bestTurrets)
+    public Dictionary<string, int> GetElementsAmount(List<string> bestTurrets)
     {
         Dictionary<string, int> elementsAmount = new()
         {
@@ -92,7 +90,7 @@ public class TurretsManager : MonoBehaviour
             { "B", 0 }
         };
 
-        foreach (string turret in bestTurrets.Keys)
+        foreach (string turret in bestTurrets)
         {
             for (int i = 0; i < turret.Length; i++)
             {

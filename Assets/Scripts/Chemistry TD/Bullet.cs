@@ -5,16 +5,19 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
+    [SerializeField]
+    private float speed = 10f;
     public GameObject objective;
-    public int DMG;
     public string type;
+    public Turret parent;
 
     // Update is called once per frame
     void Update()
     {
         if (objective != null)
         {
-            Vector2.MoveTowards(transform.position, objective.transform.position, Time.deltaTime * 10);
+            Vector3 direction = (objective.transform.position - transform.position).normalized;
+            transform.position += direction * speed * Time.deltaTime;
         }
         else
         {
@@ -24,9 +27,9 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision == objective)
+        if (collision.gameObject == objective)
         {
-            objective.GetComponent<Virus>().ProcessHit(DMG, type);
+            objective.GetComponent<Virus>().ProcessHit(type);
             Destroy(gameObject);
         }
     }

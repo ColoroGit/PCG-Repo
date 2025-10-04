@@ -5,46 +5,75 @@ using UnityEngine;
 public class Turret : MonoBehaviour
 {
     public GameObject bulletPrefab;
-    public GameObject currentVirus;
+    public Virus currentVirus;
 
     public string type;
     public float recoil;
 
-    private Coroutine shooting;
+    public Coroutine shooting;
 
     private void Update()
     {
-        if (currentVirus != null)
+        if (currentVirus == null)
         {
-            shooting = StartCoroutine(Shoot());
-        }
-        else if (shooting != null)
-        {
-            StopCoroutine(shooting);
-            shooting = null;
+            if (shooting != null)
+            {
+                StopCoroutine(shooting);
+                shooting = null;
+            }
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("virus"))
+        Virus v = collision.gameObject.GetComponent<Virus>();
+
+        if (v)
         {
-            currentVirus = collision.gameObject;
+            if (currentVirus == null)
+            {
+                currentVirus = v;
+                shooting = StartCoroutine(Shoot());
+            }
+            else if (v.progress > currentVirus.progress)
+            {
+                currentVirus = v;
+                if (shooting != null)
+                {
+                    StopCoroutine(shooting);
+                }
+                shooting = StartCoroutine(Shoot());
+            }
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.gameObject == currentVirus)
+        if (currentVirus != null && collision.gameObject == currentVirus.gameObject)
         {
             currentVirus = null;
+            if (shooting != null)
+            {
+                StopCoroutine(shooting);
+                shooting = null;
+            }
         }
     }
 
     private IEnumerator Shoot()
     {
-        GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
-        bullet.GetComponent<Bullet>().type = type;
-        yield return new WaitForSeconds(recoil);
+        while (true)
+        {
+            yield return new WaitForSeconds(recoil);
+
+            if (currentVirus == null)
+                yield break;
+
+            GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
+            Bullet b = bullet.GetComponent<Bullet>();
+            b.type = type;
+            b.objective = currentVirus.gameObject;
+            b.parent = this;
+        }
     }
 }

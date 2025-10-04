@@ -2279,6 +2279,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ui: {fileID: 890792231}
+  vsm: {fileID: 1177901407}
   virusAmount: 2
 --- !u!114 &890792233
 MonoBehaviour:
@@ -2645,6 +2646,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1177901406}
+  - component: {fileID: 1177901407}
   m_Layer: 0
   m_Name: VirusSpawnManager
   m_TagString: Untagged
@@ -2661,12 +2663,26 @@ Transform:
   m_GameObject: {fileID: 1177901405}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.9096975, y: 6.6113715, z: -0.06353301}
+  m_LocalPosition: {x: -3.4, y: 10, z: -0.06353301}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1177901407
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1177901405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc7c6e3f3c08cfb4381156cf3bd31777, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  virusPrefab: {fileID: 7817070630519319377, guid: f6dfaddf5863ec140b5b597da0057640, type: 3}
+  virusToSpawn: 10
 --- !u!1 &1219483299
 GameObject:
   m_ObjectHideFlags: 0
