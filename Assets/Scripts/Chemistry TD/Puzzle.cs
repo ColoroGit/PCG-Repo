@@ -47,7 +47,7 @@ public class Puzzle : MonoBehaviour
         selectedBestTurrets ??= new();
 
         SelectRandomVirus();
-        //AdjustAmountOfResistances();
+        AdjustAmountOfResistances();
 
         float maxDMGOutput = 3 + (2 * (virusAmount - 1));
         float desiredDMGOutput = maxDMGOutput * DMGOutputDifficulty;
@@ -78,6 +78,9 @@ public class Puzzle : MonoBehaviour
         int finalAmount = (int)(virusAmount * resistanceAmount);
         int currentAmount = selectedVirus.Sum(v => v.Length);
 
+        Debug.Log("Final Amount: " + finalAmount);
+        Debug.Log("Current Amount: " + currentAmount);
+
         while (currentAmount != finalAmount)
         {
             Debug.Log("Inside Big Loop");
@@ -103,8 +106,9 @@ public class Puzzle : MonoBehaviour
                     newAtom = virusTypes[Random.Range(0, virusTypes.Count)][0];
                 } while (randomV.Contains(newAtom));
 
+                string previousV = randomV;
                 randomV += newAtom;
-                selectedVirus[selectedVirus.IndexOf(randomV)] = randomV;
+                selectedVirus[selectedVirus.IndexOf(previousV)] = randomV;
             }
             else
             {
@@ -126,6 +130,7 @@ public class Puzzle : MonoBehaviour
                 randomV = randomV.Replace(atomToRemove.ToString(), "");
                 selectedVirus[selectedVirus.IndexOf(previousV)] = randomV;
             }
+            currentAmount = selectedVirus.Sum(v => v.Length);
         }
     }
 

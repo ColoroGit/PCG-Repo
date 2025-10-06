@@ -15,6 +15,7 @@ public class Virus : MonoBehaviour
     public Vector3 direction;
 
     public string type;
+    private int HP;
     public int progress = 0; 
 
     private void Update()
@@ -49,10 +50,20 @@ public class Virus : MonoBehaviour
     {
         //Esto se podría invertir; por cada elemento distinto que tenga _type, este hará la misma cantidad de daño
         //Y se irá descontando si es que el virus tiene resistencia a algún elemento
+        if (HP == 0)
+        {
+            HP = type.Length;
+        }
 
-        if (_type.Any(c => type.Contains(c))) // No hit
-            return;
+        foreach (char c in _type)
+        {
+            if (!type.Contains(c))
+            {
+                HP--;
+            }
+        }
 
-        Destroy(gameObject);
+        if (HP == 0)
+            Destroy(gameObject);
     }
 }
