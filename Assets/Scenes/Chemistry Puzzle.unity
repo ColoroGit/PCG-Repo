@@ -2281,6 +2281,8 @@ MonoBehaviour:
   ui: {fileID: 890792231}
   vsm: {fileID: 1177901407}
   virusAmount: 2
+  resistanceAmount: 1
+  DMGOutputDifficulty: 0
 --- !u!114 &890792233
 MonoBehaviour:
   m_ObjectHideFlags: 0

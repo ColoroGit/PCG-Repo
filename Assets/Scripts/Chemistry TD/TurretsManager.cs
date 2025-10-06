@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class TurretsManager : MonoBehaviour
@@ -45,27 +46,15 @@ public class TurretsManager : MonoBehaviour
         return fitness;
     }
 
-    private List<string> SortFitnessTurrets(Dictionary<string, int> fitnessTurrets)
+    private Dictionary<string, int> SortFitnessTurrets(Dictionary<string, int> fitnessTurrets)
     {
         List<KeyValuePair<string, int>> sortedList = new(fitnessTurrets);
         sortedList.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
-        fitnessTurrets.Clear();
-        foreach (KeyValuePair<string, int> pair in sortedList)
-        {
-            fitnessTurrets.Add(pair.Key, pair.Value);
-        }
-
-        List<string> sortedTurrets = new();
-
-        foreach (KeyValuePair<string, int> pair in fitnessTurrets)
-        {
-            sortedTurrets.Add(pair.Key);
-        }
-
-        return sortedTurrets;
+        
+        return sortedList.ToDictionary(pair => pair.Key, pair => pair.Value);
     }
 
-    public List<string> GetBestTurrets(List<string> elementResistences)
+    public Dictionary<string, int> GetBestTurrets(List<string> elementResistences)
     {
         Debug.Log($"Element resistence: {elementResistences.ToString()}");
         Dictionary<string, int> fitnessTurrets = new(); 
