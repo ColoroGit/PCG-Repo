@@ -41,7 +41,6 @@ public class GenAlg : MonoBehaviour
     [Range(1, 100)][SerializeField]
     private int perturbationCells = 25;
 
-
     public float connectionWeight
     {
         get => _connectionWeight;
@@ -91,7 +90,6 @@ public class GenAlg : MonoBehaviour
             _singlePathWeight /= total;
         }
     }
-
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.R))
