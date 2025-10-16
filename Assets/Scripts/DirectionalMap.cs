@@ -8,7 +8,13 @@ public class DirectionalMap
     public List<Vector2> path = new();
     public Vector2 startPos;
     public Vector2 currentPos;
+    public int turns;
     public int limit = 11; //values from 0 to 11; those that have 0 or 11 are boundaries (walls), only used for starting and ending points
+    
+    public float extensionWeight;
+    public float coverageWeight;
+    public float turnsWeight;
+    public float turnsDensity;
     public float fitness;
 
     public enum Direction
@@ -37,8 +43,30 @@ public class DirectionalMap
         }
     }
 
-    public DirectionalMap()
+    public Direction OppositeDirection(Direction dir)
     {
+        switch (dir)
+        {
+            case Direction.Up:
+                return Direction.Down;
+            case Direction.Down:
+                return Direction.Up;
+            case Direction.Left:
+                return Direction.Right;
+            case Direction.Right:
+                return Direction.Left;
+            default:
+                return Direction.None;
+        }
+    }
+
+    public DirectionalMap(float _extensionWeight, float _coverageWeight, float _turnsWeigt, float _turnsDensity)
+    {
+        extensionWeight = _extensionWeight;
+        coverageWeight = _coverageWeight;
+        turnsWeight = _turnsWeigt;
+        turnsDensity = _turnsDensity;
+
         // Select a random starting position on the boundary
         int XorY = Random.Range(0, 2);
         startPos = currentPos = (XorY == 0) ? (Random.Range(0, 2) == 0) ? new Vector2(0, Random.Range(1, limit)) : new Vector2(11, Random.Range(1, limit))
@@ -55,22 +83,29 @@ public class DirectionalMap
         while (currentPos.x != 0 && currentPos.y != 0 && currentPos.x != limit && currentPos.y != limit)
         {
             Direction nm = PickNextMove();
+            dMap.Add(nm);
+            ActualizeCurrentPosInMap(dMap[dMap.Count - 1]);
 
             if (nm == Direction.None)
             {
                 Debug.Log("No possible moves left, stopping path generation.");
+                fitness = 0;
                 break;
             }
-
-            dMap.Add(nm);
-            ActualizeCurrentPosInMap(dMap[dMap.Count - 1]);
         }
     }
 
     private Direction PickNextMove()
     {
         List<Direction> possibleMoves = new List<Direction> { Direction.Up, Direction.Down, Direction.Left, Direction.Right };
-        
+
+        possibleMoves.Remove(OppositeDirection(dMap[dMap.Count - 1]));
+
+        if (dMap.Count > 1 && dMap[dMap.Count - 1] != dMap[dMap.Count - 2])
+        {
+            possibleMoves.Remove(OppositeDirection(dMap[dMap.Count - 2]));            
+        }
+
         while (true)
         {
             if (possibleMoves.Count == 0)
@@ -82,9 +117,37 @@ public class DirectionalMap
             }
             else
             {
-                return nextMove;
+                if (SimulateNextMove(nextMove))
+                    return nextMove;
+                else
+                    possibleMoves.Remove(nextMove);
             }
         }
+    }
+
+    public bool SimulateNextMove(Direction nm)
+    {
+        Vector2 simulatedPos = currentPos + DirectionToVector2(nm);
+
+        List<Direction> possibleMoves = new List<Direction> { Direction.Up, Direction.Down, Direction.Left, Direction.Right };
+
+        possibleMoves.Remove(OppositeDirection(nm));
+
+        if (nm != dMap[dMap.Count - 1])
+        {
+            possibleMoves.Remove(OppositeDirection(dMap[dMap.Count - 1]));
+        }
+
+        foreach (Direction dir in possibleMoves)
+        {
+            Vector2 newSimulatedPos = simulatedPos + DirectionToVector2(dir);
+            if (path.Contains(newSimulatedPos))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void ActualizeCurrentPosInMap(Direction dir)
@@ -95,39 +158,12 @@ public class DirectionalMap
 
     public void CalculateFitness()
     {
-        float neighborsFitness = NeighborsFitness();
-        float extensionFitness = ExtensionFitness(); /*Agregarle wieght para jugar con los resultados*/
-        float coverageFitness = CoverageFitness(); /*Agregarle wieght para manipular la dificultad*/
-        fitness = (neighborsFitness + extensionFitness + coverageFitness) / 3f;
-    }
+        if (dMap[dMap.Count - 1] == Direction.None) { fitness = 0; return; }
 
-    // Fitnsess de los vecinos
-    private float NeighborsFitness()
-    {
-        int maxCellScore = 2;
-        int maxPossibleScore = path.Count * maxCellScore - 2;
-        int totalScore = 0;
-        foreach (Vector2 cell in path) 
-        { 
-            int connections = 0;
-            // Up
-            if (path.Contains(cell + DirectionToVector2(Direction.Up))) connections++;
-            // Down
-            if (path.Contains(cell + DirectionToVector2(Direction.Down))) connections++;
-            // Left
-            if (path.Contains(cell + DirectionToVector2(Direction.Left))) connections++;
-            // Right
-            if (path.Contains(cell + DirectionToVector2(Direction.Right))) connections++;
-
-            if (connections == 2)
-                totalScore += maxCellScore; // Maximum score
-            else if (connections == 1 || connections == 3)
-                totalScore += 1; // Medium score
-            // 0 or 4 connections: minimum score (0)
-        }
-
-        float fitness = (float)totalScore / maxPossibleScore;
-        return fitness;
+        float extensionFitness = ExtensionFitness() * extensionWeight;
+        float coverageFitness = CoverageFitness() * coverageWeight;
+        float turnsFitness = TurnsFitness() * turnsWeight; 
+        fitness = (extensionFitness + coverageFitness + turnsFitness) / 3f;
     }
 
     // Fitness de extensión
@@ -156,6 +192,23 @@ public class DirectionalMap
         return (float)path.Count / maxExtension;
     }
 
+    private float TurnsFitness()
+    {
+        turns = 0;
+        for (int i = 1; i < dMap.Count; i++)
+        {
+            if (dMap[i] != dMap[i - 1])
+                turns++;
+        }
+
+        float maxDiff = dMap.Count;
+        float amplifiedDensity = turnsDensity * maxDiff;
+        float diff = Mathf.Abs(turns - amplifiedDensity);
+
+        // Mientras diff sea más pequeño, más fitness
+        return 1f - Mathf.Clamp01(diff / maxDiff);
+    }
+
     public void Perturbate(int pos)
     {
         currentPos = startPos;
@@ -172,9 +225,16 @@ public class DirectionalMap
         foreach (Direction dir in dMap.GetRange(pos + 1, dMap.Count - (pos + 1)))
         {
             curentPosIndex++;
-            if (currentPos.x != 0 && currentPos.y != 0 && currentPos.x != limit && currentPos.y != limit)
+            // Si ya llegamos a un borde, salimos
+            if (currentPos.x == 0 || currentPos.y == 0 || currentPos.x == limit || currentPos.y == limit)
             {
-                dMap.RemoveRange(curentPosIndex, dMap.Count - (curentPosIndex + 1));
+                dMap.RemoveRange(curentPosIndex, dMap.Count - curentPosIndex);
+                break;
+            }
+            // Si la dirección no es válida (por restricciones de PickNextMove), salimos
+            if (path.Contains(currentPos + DirectionToVector2(dir)) || !SimulateNextMove(dir))
+            {
+                dMap.RemoveRange(curentPosIndex, dMap.Count - curentPosIndex);
                 break;
             }
             ActualizeCurrentPosInMap(dir);
@@ -185,6 +245,13 @@ public class DirectionalMap
             Direction nm = PickNextMove();
             dMap.Add(nm);
             ActualizeCurrentPosInMap(dMap[dMap.Count - 1]);
+
+            if (nm == Direction.None)
+            {
+                Debug.Log("No possible moves left, stopping path generation.");
+                fitness = 0;
+                break;
+            }
         }
     }
 }

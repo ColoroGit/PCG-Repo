@@ -247,6 +247,10 @@ MonoBehaviour:
   mu: 10
   lambda: 10
   maxGenerations: 50
+  extensionWeight: 0.523
+  coverageWeight: 0.76
+  turnsWeight: 1
+  turnsDensity: 0.509
 --- !u!4 &1853589255
 Transform:
   m_ObjectHideFlags: 0

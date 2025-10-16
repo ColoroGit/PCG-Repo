@@ -19,6 +19,18 @@ public class EA : MonoBehaviour
     [SerializeField]
     private int maxGenerations = 50;
 
+    [SerializeField, Range (0, 1)]
+    private float extensionWeight;
+
+    [SerializeField, Range(0, 1)]
+    private float coverageWeight;
+
+    [SerializeField, Range(0, 1)]
+    private float turnsWeight;
+
+    [SerializeField, Range(0, 1)]
+    private float turnsDensity;
+
     private void Start()
     {
         population ??= new();
@@ -52,7 +64,7 @@ public class EA : MonoBehaviour
     {
         for (int i = 0; i < mu + lambda; i++)
         {
-            DirectionalMap individual = new DirectionalMap();
+            DirectionalMap individual = new DirectionalMap(extensionWeight, coverageWeight, turnsWeight, turnsDensity);
             population.Add(individual);
         }
     }
@@ -89,21 +101,12 @@ public class EA : MonoBehaviour
         }
     }
 
-    private void GenerateOffspring()
-    {
-        List<DirectionalMap> offspring = MakeEliteIndividualCopies();
-
-        RandomOffspringPerturbation(offspring);
-
-        population.AddRange(offspring);
-    }
-
-    private void GenerateNewOffspring()
+    private void GenerateRandomOffspring()
     {
         //List<DirectionalMap> offspring = new();
         for (int i = 0; i < lambda; i++)
         {
-            DirectionalMap individual = new DirectionalMap();
+            DirectionalMap individual = new DirectionalMap(extensionWeight, coverageWeight, turnsWeight, turnsDensity);
             population.Add(individual);
 
             //DirectionalMap parent1 = population[Random.Range(0, mu)];
@@ -113,6 +116,15 @@ public class EA : MonoBehaviour
             //offspring.Add(child);
         }
         //population.AddRange(offspring);
+    }
+
+    private void GenerateOffspring()
+    {
+        List<DirectionalMap> offspring = MakeEliteIndividualCopies();
+
+        RandomOffspringPerturbation(offspring);
+
+        population.AddRange(offspring);
     }
 
     private List<DirectionalMap> MakeEliteIndividualCopies()
@@ -147,8 +159,8 @@ public class EA : MonoBehaviour
             CalculateMapsFitness();
             SortPopulation();
             KeepElitePopulation();
-            //GenerateNewOffspring();
-            GenerateOffspring();
+            GenerateRandomOffspring();
+            //GenerateOffspring();
 
             foreach (Transform child in transform)
             {
