@@ -6,7 +6,7 @@ public class DirectionalMap
 {
     public List<Direction> dMap = new();
     public List<Vector2> path = new();
-    public Vector2 startPos;
+    public Vector3 startPos;
     public Vector2 currentPos;
     public int turns;
     public int limit = 11; //values from 0 to 11; those that have 0 or 11 are boundaries (walls), only used for starting and ending points
@@ -88,7 +88,7 @@ public class DirectionalMap
 
             if (nm == Direction.None)
             {
-                Debug.Log("No possible moves left, stopping path generation.");
+                Debug.Log("No possible moves left, stopping path generation");
                 fitness = 0;
                 break;
             }
@@ -248,7 +248,7 @@ public class DirectionalMap
 
             if (nm == Direction.None)
             {
-                Debug.Log("No possible moves left, stopping path generation.");
+                Debug.Log("No possible moves left, stopping path generation");
                 fitness = 0;
                 break;
             }

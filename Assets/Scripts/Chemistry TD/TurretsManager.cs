@@ -25,43 +25,80 @@ public class TurretsManager : MonoBehaviour
         Instance = this;
     }
 
-    private int CalculateFitness(string turret, List<string> elementResistences)
+    private float CalculateFitness(string turret, List<string> elementResistences)
     {
-        int index = turretsTypes.IndexOf(turret);
-        int fitness = 0;
+        float allKillerFitness = CalculateAllKillerFitness(turret, elementResistences);
+        float oneShotFitness = CalculateMaxSingleVirusDamageFitness(turret, elementResistences);
+
+        Debug.Log($"Turret: {turret} fitness is {allKillerFitness + oneShotFitness}");
+        return allKillerFitness + oneShotFitness;
+    }
+
+    // Daño máximo posible a un solo virus (cantidad de elementos de la torreta que no están en la resistencia)
+    private float CalculateMaxSingleVirusDamageFitness(string turret, List<string> elementResistences)
+    {
+        float maxDamage = 0f;
 
         foreach (string resistance in elementResistences)
         {
-            foreach (char element in resistance)
+            float damage = 0f;
+            foreach (char element in turret)
             {
-                if (!turret.Contains(element))
+                if (!resistance.Contains(element))
                 {
-                    fitness++;
+                    damage += 1f;
                 }
+            }
+            if (damage > maxDamage)
+            {
+                maxDamage = damage;
             }
         }
 
-        Debug.Log($"Turret: {turret} fitness is {fitness}");
+        return maxDamage;
+    }
+
+    // Cantidad de virus distintos que puede dañar la torreta (al menos un elemento de la torreta le hace daño)
+    private float CalculateAllKillerFitness(string turret, List<string> elementResistences)
+    {
+        float fitness = 0f;
+
+        foreach (string resistance in elementResistences)
+        {
+            bool canHit = false;
+            foreach (char element in turret)
+            {
+                if (!resistance.Contains(element))
+                {
+                    canHit = true;
+                    break;
+                }
+            }
+            if (canHit)
+            {
+                fitness += 1f;
+            }
+        }
 
         return fitness;
     }
 
-    private Dictionary<string, int> SortFitnessTurrets(Dictionary<string, int> fitnessTurrets)
+    private Dictionary<string, float> SortFitnessTurrets(Dictionary<string, float> fitnessTurrets)
     {
-        List<KeyValuePair<string, int>> sortedList = new(fitnessTurrets);
+        List<KeyValuePair<string, float>> sortedList = new(fitnessTurrets);
         sortedList.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
         
         return sortedList.ToDictionary(pair => pair.Key, pair => pair.Value);
     }
 
-    public Dictionary<string, int> GetBestTurrets(List<string> elementResistences)
+    public Dictionary<string, float> GetBestTurrets(List<string> elementResistences)
     {
-        Debug.Log($"Element resistence: {elementResistences.ToString()}");
-        Dictionary<string, int> fitnessTurrets = new(); 
+        Debug.Log($"Element resistence: {string.Join(", ", elementResistences)}");
+        Dictionary<string, float> fitnessTurrets = new(); 
 
         foreach (string turret in turretsTypes)
         {
-            int fitness = CalculateFitness(turret, elementResistences);
+            float fitness = CalculateFitness(turret, elementResistences);
             fitnessTurrets.Add(turret, fitness);
         }
 

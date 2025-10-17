@@ -8,6 +8,14 @@ using System;
 
 public class UIManager : MonoBehaviour
 {
+    private Button selectedMoleculeButton;
+    private ColorBlock defaultColorBlock;
+    private bool colorBlockInitialized = false;
+
+    [Header("Puzzle y EA")]
+    [SerializeField] Puzzle puzzle;
+    [SerializeField] EA ea;
+
     [Header("Contadores elementos")]
     [SerializeField] TMP_Text HCounterText;
     [SerializeField] TMP_Text OCounterText;
@@ -30,12 +38,24 @@ public class UIManager : MonoBehaviour
     [SerializeField] Button NaClButton; // NB
     [SerializeField] Button NaOHButton; // NOH
 
+    [Header("Sliders y Seed")]
+    [SerializeField] Slider virusAmountSlider;
+    [SerializeField] Slider resistanceAmountSlider;
+    [SerializeField] Slider difficultySlider;
+    [SerializeField] Slider extensionWeightSlider;
+    [SerializeField] Slider coverageWeightSlider;
+    [SerializeField] Slider turnsWeightSlider;
+    [SerializeField] Slider turnsDensitySlider;
+    [SerializeField] TMP_InputField SeedText;
+
     [Header("Referencia a torretas")]
-    [SerializeField] GameObject TurretSpots;
+    public int turretsBuilt = 0;
     [SerializeField] GameObject TurretPrefab;
+    [SerializeField] GameObject cleaner;
+
     void Start()
     {
-        HCounter = int.Parse(HCounterText.text); // Cambiar a que se iguale al resultado del script de puzzle en vez del valor de los textos
+        HCounter = int.Parse(HCounterText.text);
         OCounter = int.Parse(OCounterText.text);
         CCounter = int.Parse(CCounterText.text);
         NaCounter = int.Parse(NaCounterText.text);
@@ -49,80 +69,105 @@ public class UIManager : MonoBehaviour
         NaOHButton.onClick.AddListener(NaOHButtonOnButtonClick);
     }
 
-    void Update()
+    public void Generate()
     {
-        
+        foreach (Transform child in cleaner.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        turretsBuilt = 0;
+        UnityEngine.Random.InitState(int.Parse(SeedText.text));
+        ea.Generate();
+        puzzle.Generate();
+    }
+
+    private void SelectMoleculeButton(Button button)
+    {
+        if (!colorBlockInitialized)
+        {
+            defaultColorBlock = button.colors;
+            colorBlockInitialized = true;
+        }
+
+        selectedMoleculeButton = button;
+        ColorBlock cb = button.colors;
+        cb.normalColor = Color.yellow;
+        cb.selectedColor = Color.yellow;
+        button.colors = cb;
+
+        // Deshabilita los otros botones
+        foreach (var b in new[] { H2OButton, CO2Button, HClButton, CH4Button, NaClButton, NaOHButton })
+        {
+            if (b != button)
+                b.interactable = false;
+        }
+    }
+
+    private void ResetMoleculeButtons()
+    {
+        if (selectedMoleculeButton != null)
+        {
+            selectedMoleculeButton.colors = defaultColorBlock;
+            selectedMoleculeButton = null;
+        }
+        foreach (var b in new[] { H2OButton, CO2Button, HClButton, CH4Button, NaClButton, NaOHButton })
+        {
+            b.interactable = true;
+        }
     }
 
     private void H2OOnButtonClick()
     {
-        if(HCounter >= 2 && OCounter >= 1)
+        if (HCounter >= 2 && OCounter >= 1 && turretsBuilt < puzzle.virusAmount)
         {
-            HCounter -= 2;
-            OCounter -= 1;
-
-            PlaceTurret("HOO");
-            UpdateElementsCounter();
+            SelectMoleculeButton(H2OButton);
+            StartCoroutine(PlaceTurretCoroutine("HOO", H2OButton));
         }
     }
 
     private void CO2OnButtonClick()
     {
-        if(CCounter >= 1 && OCounter >= 2)
+        if (CCounter >= 1 && OCounter >= 2 && turretsBuilt < puzzle.virusAmount)
         {
-            CCounter -= 1;
-            OCounter -= 2;
-
-            PlaceTurret("COO");
-            UpdateElementsCounter();
+            SelectMoleculeButton(CO2Button);
+            StartCoroutine(PlaceTurretCoroutine("COO", CO2Button));
         }
     }
 
     private void HClButtonOnButtonClick()
     {
-        if (HCounter >= 1 && ClCounter >= 1)
+        if (HCounter >= 1 && ClCounter >= 1 && turretsBuilt < puzzle.virusAmount)
         {
-            HCounter -= 1;
-            ClCounter -= 1;
-
-            PlaceTurret("HB");
-            UpdateElementsCounter();
+            SelectMoleculeButton(HClButton);
+            StartCoroutine(PlaceTurretCoroutine("HB", HClButton));
         }
     }
 
     private void CH4ButtonOnButtonClick()
     {
-        if(CCounter >= 1 && HCounter >= 4)
+        if (CCounter >= 1 && HCounter >= 4 && turretsBuilt < puzzle.virusAmount)
         {
-            CCounter -= 1;
-            HCounter -= 4;
-
-            PlaceTurret("CHHHH");
-            UpdateElementsCounter();
+            SelectMoleculeButton(CH4Button);
+            StartCoroutine(PlaceTurretCoroutine("CHHHH", CH4Button));
         }
     }
 
     private void NaClButtonOnButtonClick()
     {
-        if(NaCounter >= 1 && ClCounter >= 1)
+        if (NaCounter >= 1 && ClCounter >= 1 && turretsBuilt < puzzle.virusAmount)
         {
-            NaCounter -= 1;
-            ClCounter -= 1;
-
-            PlaceTurret("NB");
-            UpdateElementsCounter();
+            SelectMoleculeButton(NaClButton);
+            StartCoroutine(PlaceTurretCoroutine("NB", NaClButton));
         }
     }
+
     private void NaOHButtonOnButtonClick()
     {
-        if(NaCounter >= 1 && OCounter >= 1 && HCounter >= 1)
+        if (NaCounter >= 1 && OCounter >= 1 && HCounter >= 1 && turretsBuilt < puzzle.virusAmount)
         {
-            NaCounter -= 1;
-            OCounter -= 1;
-            HCounter -= 1;
-
-            PlaceTurret("NOH");
-            UpdateElementsCounter();
+            SelectMoleculeButton(NaOHButton);
+            StartCoroutine(PlaceTurretCoroutine("NOH", NaOHButton));
         }
     }
 
@@ -165,18 +210,96 @@ public class UIManager : MonoBehaviour
         UpdateElementsCounter();
     }
 
-    void PlaceTurret(string type)
+    IEnumerator PlaceTurretCoroutine(string type, Button moleculeButton)
     {
-        Transform currentTransform = TurretSpots.transform;
+        bool waitingForClick = true;
 
-        foreach (Transform child in currentTransform)
+        while (waitingForClick)
         {
-            if (child.childCount == 0)
+            if (Input.GetMouseButtonDown(0))
             {
-                GameObject turret = Instantiate(TurretPrefab, child);
-                turret.GetComponent<Turret>().type = type;
-                return; 
+                if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+                {
+                    if (selectedMoleculeButton == moleculeButton)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    RaycastHit hit;
+
+                    if (Physics.Raycast(ray, out hit))
+                    {
+                        GameObject clickedObj = hit.collider.gameObject;
+                        if (clickedObj.name.StartsWith("MapRoad_"))
+                        {
+                            // No hacer nada, seguir esperando
+                            Debug.Log("No se puede colocar una torreta en el camino.");
+                        }
+                        else
+                        {
+                            Debug.Log("Turreta colocada de tipo: " + type);
+                            DepleteAtoms(type);
+                            GameObject turret = Instantiate(TurretPrefab, cleaner.transform);
+                            turret.transform.position = hit.point + Vector3.back;
+                            turret.GetComponent<Turret>().type = type;
+                            turretsBuilt++;
+                            break;
+                        }
+                    }
+                }
             }
+            yield return null;
         }
+
+        ResetMoleculeButtons();
     }
+
+    private void DepleteAtoms(string type)
+    {
+        switch (type)
+        {
+            case "HOO":
+                HCounter -= 2;
+                OCounter -= 1;
+                break;
+            case "COO":
+                CCounter -= 1;
+                OCounter -= 2;
+                break;
+            case "HB":
+                HCounter -= 1;
+                ClCounter -= 1;
+                break;
+            case "CHHHH":
+                CCounter -= 1;
+                HCounter -= 4;
+                break;
+            case "NB":
+                NaCounter -= 1;
+                ClCounter -= 1;
+                break;
+            case "NOH":
+                NaCounter -= 1;
+                OCounter -= 1;
+                HCounter -= 1;
+                break;
+            default:
+                Debug.Log("Tipo de molécula no reconocido para depletar átomos.");
+                break;
+        }
+
+        UpdateElementsCounter();
+    }
+
+    public void OnVirusAmountSliderChanged() { puzzle.SetVirusAmount(virusAmountSlider.value); }
+    public void OnResistanceAmountSliderChanged() { puzzle.SetResistanceAmount(resistanceAmountSlider.value); }
+    public void OnDiffiultySliderChanged() { puzzle.SetDifficulty(difficultySlider.value); }
+    public void OnExtensionWeightSliderChanged() { ea.SetExtensionWeight(extensionWeightSlider.value); }
+    public void OnCoverageWeightSliderChanged() { ea.SetCoverageWeight(coverageWeightSlider.value); }
+    public void OnTurnsWeightSliderChanged() { ea.SetTurnsWeight(turnsWeightSlider.value); }
+    public void OnTurnsDensitySliderChanged() { ea.SetTurnsDensity(turnsDensitySlider.value); }
+    public void OnSeedChanged() { UnityEngine.Random.InitState(int.Parse(SeedText.text)); }
 }

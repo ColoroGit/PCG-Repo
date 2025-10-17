@@ -8,7 +8,6 @@ public class EA : MonoBehaviour
 {
     private int currentGeneration = 0;
     private List<DirectionalMap> population;
-    private Coroutine algorithm;
 
     [SerializeField]
     private int mu = 10;
@@ -31,33 +30,30 @@ public class EA : MonoBehaviour
     [SerializeField, Range(0, 1)]
     private float turnsDensity;
 
+    [SerializeField]
+    private GameObject vsm;
+
+    public void SetExtensionWeight(float weight) { extensionWeight = weight; }
+    public void SetCoverageWeight(float weight) { coverageWeight = weight; }
+    public void SetTurnsWeight(float weight) { turnsWeight = weight; }
+    public void SetTurnsDensity(float density) { turnsDensity = density; }
+
     private void Start()
     {
         population ??= new();
-        InitializePopulation();
-
-        algorithm = StartCoroutine(PlayAlgorithm());
     }
 
-    private void Update()
+    public void Generate()
     {
-        if (Input.GetKeyDown(KeyCode.R))
+        foreach (Transform child in transform)
         {
-            if (algorithm != null)
-            {
-                StopCoroutine(algorithm);
-            }
-
-            foreach (Transform child in transform)
-            {
-                Destroy(child.gameObject);
-            }
-
-            population = new();
-            currentGeneration = 0;
-            InitializePopulation();
-            algorithm = StartCoroutine(PlayAlgorithm());
+            Destroy(child.gameObject);
         }
+
+        population.Clear();
+        currentGeneration = 0;
+        InitializePopulation();
+        PlayAlgorithm();
     }
 
     private void InitializePopulation()
@@ -147,10 +143,8 @@ public class EA : MonoBehaviour
         }
     }
 
-    private IEnumerator PlayAlgorithm()
+    private void PlayAlgorithm()
     {
-        Debug.Log($"Starting Genetic Algorithm with population size {population.Count}");
-
         while (currentGeneration < maxGenerations)
         {
             Debug.Log($"Generation {currentGeneration}");
@@ -168,12 +162,10 @@ public class EA : MonoBehaviour
             }
 
             GetHighestFitness();
-            PrintTop5();
-
             currentGeneration++;
-
-            yield return new WaitForSeconds(0.5f);
         }
+
+        PrintBest();
     }
 
     private void GetHighestFitness()
@@ -184,39 +176,37 @@ public class EA : MonoBehaviour
         }
     }
 
-    private void PrintTop5()
+    private void PrintBest()
     {
-        Debug.Log("Top 5 Maps:");
-        for (int i = 0; i < Mathf.Min(5, population.Count); i++)
-        {
-            Debug.Log($"Rank {i + 1} - Fitness: {population[i].fitness}");
-            DrawMapInScene(population[i], new Vector3(i * 13, 0, 0)); // Offset each map horizontally
-        }
+        Debug.Log("Best Map:");
+        Debug.Log($"Fitness: {population[0].fitness}");
+        DrawMapInScene(population[0], Vector3.zero);
     }
 
     private void DrawMapInScene(DirectionalMap mapObj, Vector3 origin)
     {
-        float cellSize = 1.0f;
+        float cellSize = 3.0f; 
+        List<Vector3> pathAsVector3 = new List<Vector3>();
 
         GameObject mapParent = new GameObject($"Map_{mapObj.fitness:F2}");
         mapParent.transform.position = origin;
         mapParent.transform.parent = this.transform;
 
-        GameObject background = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        background.transform.position = origin + new Vector3(((mapObj.limit + 1) / 2f) * cellSize - (cellSize / 2f), ((mapObj.limit + 1) / 2f) * cellSize - (cellSize / 2f), 1);
-        background.transform.localScale = new Vector3((mapObj.limit + 1) * cellSize, (mapObj.limit + 1) * cellSize, 0.1f);
-        background.GetComponent<Renderer>().material.color = Color.gray;
-        background.name = "MapBackground";
-        background.transform.parent = mapParent.transform;
 
         foreach (Vector2 cell in mapObj.path)
         {
             GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cube.transform.position = origin + new Vector3(cell.x * cellSize, cell.y * cellSize, 0);
+            cube.transform.localScale = new Vector3(cellSize, cellSize, 0);
             cube.GetComponent<Renderer>().material.color = Color.cyan;
             cube.name = $"MapRoad_{cell.x}_{cell.y}";
 
             cube.transform.parent = mapParent.transform;
+
+            pathAsVector3.Add(cube.transform.position);
         }
+
+        vsm.transform.position = mapObj.startPos * cellSize + origin;
+        vsm.GetComponentInParent<VirusSpawnManager>().path = pathAsVector3;
     }
 }

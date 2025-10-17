@@ -9,7 +9,7 @@ public class Puzzle : MonoBehaviour
     [SerializeField] private UIManager ui;
     [SerializeField] private VirusSpawnManager vsm;
 
-    [SerializeField, Range(2, 4)] private int virusAmount = 2;
+    [SerializeField, Range(2, 4)] public int virusAmount = 2;
     [SerializeField, Range(1f, 3f)] private float resistanceAmount = 1f; // esto x virusamount = la cantidad de elementos totales a los que los virus son resistentes
     [SerializeField, Range(0f, 1f)] private float DMGOutputDifficulty;
 
@@ -22,31 +22,39 @@ public class Puzzle : MonoBehaviour
         "CNB",
     };
 
-    private List<string> selectedVirus;
-    private Dictionary<string, int> bestTurrets;
-    private Dictionary<string, int> selectedBestTurrets;
-    private Dictionary<string, int> elementsAmount;
+    private List<string> selectedVirus = new();
+    private Dictionary<string, float> bestTurrets = new();
+    private Dictionary<string, float> selectedBestTurrets = new();
+    private Dictionary<string, int> elementsAmount = new();
 
     private int maxTrys = 50;
     private float tolerance = 0.01f;
 
-    private void OnValidate()
+    public void SetVirusAmount(float amount) { virusAmount = (int)amount; }
+
+    public void SetResistanceAmount(float amount) 
     {
-        float floor = Mathf.Floor(resistanceAmount);
-        if (resistanceAmount - floor > 0.5f)
+        float floor = Mathf.Floor(amount);
+        if (amount - floor > 0.5f)
             resistanceAmount = floor + 0.5f;
         else
             resistanceAmount = floor;
     }
 
-    private void Start()
+    public void SetDifficulty(float difficulty) { DMGOutputDifficulty = difficulty; }
+
+    public void Generate()
     {
-        selectedVirus ??= new();
-        elementsAmount ??= new();
-        bestTurrets ??= new();
-        selectedBestTurrets ??= new();
+        Debug.Log("Puzzle Generation Started");
+
+        selectedVirus.Clear();
+        elementsAmount.Clear();
+        bestTurrets.Clear();
+        selectedBestTurrets.Clear();
+        maxTrys = 50;
 
         SelectRandomVirus();
+        Debug.Log($"Random Virus Selected: {string.Join(", ", selectedVirus)}");
         AdjustAmountOfResistances();
 
         float maxDMGOutput = 3 + (2 * (virusAmount - 1));
@@ -61,44 +69,35 @@ public class Puzzle : MonoBehaviour
                 Move(currentDifficulty - desiredDMGOutput);
         }
 
-        Debug.Log($"Selected virus: {string.Join(", ", selectedVirus)}");
-
         // Decompose turrets
         elementsAmount = TurretsManager.Instance.GetElementsAmount(selectedBestTurrets.Keys.ToList());
         AddConfusingAtoms(2, true);
 
+        Debug.Log($"Selected virus: {string.Join(", ", selectedVirus)}");
+        Debug.Log($"Selected Best Turrets: {string.Join(", ", selectedBestTurrets)}");
+
         ui.InitializeCounters(elementsAmount);
-        vsm.StartRound(selectedVirus);
+        vsm.virusTypes = selectedVirus;
     }
 
     private void AdjustAmountOfResistances()
     {
-        Debug.Log("AdjustingResistances");
 
         int finalAmount = (int)(virusAmount * resistanceAmount);
         int currentAmount = selectedVirus.Sum(v => v.Length);
 
-        Debug.Log("Final Amount: " + finalAmount);
-        Debug.Log("Current Amount: " + currentAmount);
-
         while (currentAmount != finalAmount)
         {
-            Debug.Log("Inside Big Loop");
-
             if (currentAmount < finalAmount)
             {
                 string randomV;
                 //faltan resistencias, agarrar un random, ver si le puedo agregar y hacerlo, sino re seleccionar
                 while (true)
                 {
-                    Debug.Log("Inside Little Loop - Adding");
-
                     randomV = selectedVirus[Random.Range(0, selectedVirus.Count)];
                     if (randomV.Length < 3)
                         break;
                 }
-
-                Debug.Log("Outside Little Loop - Adding");
 
                 char newAtom;
                 do
@@ -116,14 +115,10 @@ public class Puzzle : MonoBehaviour
                 //sobran resistencias, agarrar un random, ver si le puedo restar y hacerlo, sino re seleccionar
                 while (true)
                 {
-                    Debug.Log("Inside Little Loop - Removing");
-
                     randomV = selectedVirus[Random.Range(0, selectedVirus.Count)];
                     if (randomV.Length > 1)
                         break;
                 }
-
-                Debug.Log("Outside Little Loop - Removing");
 
                 string previousV = randomV;
                 char atomToRemove = randomV[Random.Range(0, randomV.Length)];
@@ -154,9 +149,10 @@ public class Puzzle : MonoBehaviour
         float maxDMGOutput = 3 + (2 * (virusAmount - 1));
 
         bestTurrets = TurretsManager.Instance.GetBestTurrets(selectedVirus);
+
         selectedBestTurrets.Clear();
 
-        foreach (KeyValuePair<string, int> t in bestTurrets)
+        foreach (KeyValuePair<string, float> t in bestTurrets)
         {
             selectedBestTurrets.Add(t.Key, t.Value);
             if (selectedBestTurrets.Count == virusAmount)

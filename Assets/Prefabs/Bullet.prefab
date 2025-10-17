@@ -114,7 +114,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2616241166377751393}
   m_Father: {fileID: 0}
@@ -131,9 +131,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e434e9867b383e408428e48cd59fb71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  speed: 10
   objective: {fileID: 0}
-  DMG: 5
   type: 
+  parent: {fileID: 0}
 --- !u!50 &-1302530534462393948
 Rigidbody2D:
   serializedVersion: 4
