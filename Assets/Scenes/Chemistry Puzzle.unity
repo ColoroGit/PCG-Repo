@@ -3949,6 +3949,7 @@ MonoBehaviour:
   turnsWeightSlider: {fileID: 1167200178}
   turnsDensitySlider: {fileID: 1391163074}
   SeedText: {fileID: 1247122407}
+  turretsBuilt: 0
   TurretPrefab: {fileID: 3814307240436685380, guid: d509bcd3ff117334a896df59418bbfc1, type: 3}
   cleaner: {fileID: 789726920}
 --- !u!114 &890792232

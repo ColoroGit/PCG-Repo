@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
-using static Unity.VisualScripting.LudiqRootObjectEditor;
+// using static Unity.VisualScripting.LudiqRootObjectEditor;
 
 public class GenAlg : MonoBehaviour
 {
