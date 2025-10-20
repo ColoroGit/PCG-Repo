@@ -3074,7 +3074,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 890792231}
+      - m_Target: {fileID: 890792234}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
         m_MethodName: OnExtensionWeightSliderChanged
         m_Mode: 1
@@ -3331,7 +3331,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.555818, y: 0.02479832}
   m_AnchorMax: {x: 0.6982719, y: 0.08539496}
-  m_AnchoredPosition: {x: -0.08000183, y: 0.6999817}
+  m_AnchoredPosition: {x: -0.08000183, y: 0.7000122}
   m_SizeDelta: {x: -1.6389999, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &584640088
@@ -3378,7 +3378,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 890792231}
+      - m_Target: {fileID: 890792234}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
         m_MethodName: Generate
         m_Mode: 1
@@ -4001,7 +4001,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.046000004, y: 0.6346051}
   m_AnchorMax: {x: 0.9597586, y: 0.85589916}
-  m_AnchoredPosition: {x: -0.38469696, y: -0.39099884}
+  m_AnchoredPosition: {x: -0.3847046, y: -0.3909912}
   m_SizeDelta: {x: -2.86, y: 0.5250015}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &748758231
@@ -4783,7 +4783,7 @@ GameObject:
   - component: {fileID: 890792228}
   - component: {fileID: 890792230}
   - component: {fileID: 890792229}
-  - component: {fileID: 890792231}
+  - component: {fileID: 890792234}
   - component: {fileID: 890792232}
   - component: {fileID: 890792233}
   m_Layer: 5
@@ -4853,7 +4853,36 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 890792227}
   m_CullTransparentMesh: 1
---- !u!114 &890792231
+--- !u!114 &890792232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 890792227}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f4eb293c07009048a13e254ae309a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ui: {fileID: 890792234}
+  vsm: {fileID: 1177901407}
+  virusAmount: 2
+  resistanceAmount: 3
+  DMGOutputDifficulty: 0
+--- !u!114 &890792233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 890792227}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 483690d780d7e954bb6e42d33d09ba64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &890792234
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4896,35 +4925,6 @@ MonoBehaviour:
   turretsBuilt: 0
   TurretPrefab: {fileID: 3814307240436685380, guid: d509bcd3ff117334a896df59418bbfc1, type: 3}
   cleaner: {fileID: 789726920}
---- !u!114 &890792232
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 890792227}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f4eb293c07009048a13e254ae309a03, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ui: {fileID: 890792231}
-  vsm: {fileID: 1177901407}
-  virusAmount: 2
-  resistanceAmount: 3
-  DMGOutputDifficulty: 0
---- !u!114 &890792233
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 890792227}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 483690d780d7e954bb6e42d33d09ba64, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &901826223
 GameObject:
   m_ObjectHideFlags: 0
@@ -5972,7 +5972,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 890792231}
+      - m_Target: {fileID: 890792234}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
         m_MethodName: OnTurnsWeightSliderChanged
         m_Mode: 1
@@ -6473,7 +6473,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 890792231}
+      - m_Target: {fileID: 890792234}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
         m_MethodName: OnSeedChanged
         m_Mode: 1
@@ -7044,7 +7044,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 890792231}
+      - m_Target: {fileID: 890792234}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
         m_MethodName: OnDiffiultySliderChanged
         m_Mode: 1
@@ -7146,7 +7146,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 890792231}
+      - m_Target: {fileID: 890792234}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
         m_MethodName: OnVirusAmountSliderChanged
         m_Mode: 1
@@ -7248,7 +7248,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 890792231}
+      - m_Target: {fileID: 890792234}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
         m_MethodName: OnTurnsDensitySliderChanged
         m_Mode: 1
@@ -7575,7 +7575,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 890792231}
+      - m_Target: {fileID: 890792234}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
         m_MethodName: OnCoverageWeightSliderChanged
         m_Mode: 1
@@ -9702,7 +9702,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 890792231}
+      - m_Target: {fileID: 890792234}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
         m_MethodName: OnResistanceAmountSliderChanged
         m_Mode: 1

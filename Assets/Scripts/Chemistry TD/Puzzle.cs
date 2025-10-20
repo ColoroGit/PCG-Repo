@@ -1,8 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 // using Unity.Android.Types;
 using UnityEngine;
+
+using Random = UnityEngine.Random;
 
 public class Puzzle : MonoBehaviour
 {
@@ -45,6 +48,12 @@ public class Puzzle : MonoBehaviour
 
     public void Generate()
     {
+        if (vsm.spawn != null)
+        {
+            StopCoroutine(vsm.spawn);
+            vsm.spawn = null;                       
+        }
+
         Debug.Log("Puzzle Generation Started");
 
         selectedVirus.Clear();
