@@ -72,3 +72,4 @@ public class Virus : MonoBehaviour
             Destroy(gameObject);
     }
 }
+

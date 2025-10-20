@@ -13,14 +13,18 @@ public class VirusSpawnManager : MonoBehaviour
     [SerializeField]
     private GameObject cleaner;
 
+    public Coroutine spawn;
+
     public List<string> virusTypes;
 
     public List<Vector3> path;
 
     public void StartRound()
     {
-        if (virusTypes.Count == 0) { return; }
-        StartCoroutine(SpawnVirus());
+        //if (virusTypes.Count == 0) { return; }
+        if (spawn != null)
+            return;
+        spawn = StartCoroutine(SpawnVirus());
     }
 
     private IEnumerator SpawnVirus()
@@ -36,5 +40,9 @@ public class VirusSpawnManager : MonoBehaviour
             v.path = path;
             yield return new WaitForSeconds(2);
         }
+
+        spawn = null;
+        yield break;
     }
 }
+
