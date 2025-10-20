@@ -16,7 +16,7 @@ To run the program, follow these instructions:
 
 1. Download the .zip folder with the project.
 2. Unzip the folder.
-3. Open the “PCG” file with Unity.
+3. Open the “PCG.exe” file.
 
 Once the program is open and running, follow these instructions to modify the parameters of the algorithms:
 
