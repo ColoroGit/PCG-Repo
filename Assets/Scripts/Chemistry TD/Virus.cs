@@ -2,12 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 
 public class Virus : MonoBehaviour
 {
-    [SerializeField]
-    private float speed = 3f;
+    [SerializeField] private float speed = 3f;
+    [SerializeField] private GameObject labelPrefab; // Para visualizar qué virus es, prefab de text tmp
+    [SerializeField] private Vector3 labelOffset = new Vector3(0, 1.5f, 0);
+    private TMP_Text labelInstance;
 
     public List<Vector3> path = new();
     private int currentWaypoint = 0;
@@ -21,6 +24,29 @@ public class Virus : MonoBehaviour
     private void Start()
     {
         HP = type.Length * 3;
+
+        if (labelPrefab == null)
+        {
+            Debug.LogWarning($"[Virus] {name}: labelPrefab no asignado.");
+        }
+        else
+        {
+            var labelObj = Instantiate(labelPrefab, transform);
+            labelObj.transform.localPosition = labelOffset;
+
+            // 2) Buscar el TMP_Text en RAÍZ o HIJOS (activo/inactivo)
+            labelInstance = labelObj.GetComponentInChildren<TMP_Text>(true);
+
+            if (labelInstance == null)
+            {
+                Debug.LogError($"[Virus] {name}: labelPrefab no contiene un TMP_Text en la raíz ni en sus hijos.");
+            }
+        }
+
+        if (labelInstance != null)
+        {
+            labelInstance.text = type ?? "";
+        }
     }
 
     private void Update()
@@ -54,6 +80,12 @@ public class Virus : MonoBehaviour
             transform.position = nextPosition;
         }
         progress++;
+
+        // label siempre mira a la cámara
+        if (labelInstance != null && Camera.main != null)
+        {
+            labelInstance.transform.rotation = Camera.main.transform.rotation;
+        }
     }
 
     public void ProcessHit(string _type)

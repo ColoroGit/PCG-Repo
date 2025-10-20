@@ -38,14 +38,21 @@ public class UIManager : MonoBehaviour
     [SerializeField] Button NaClButton; // NB
     [SerializeField] Button NaOHButton; // NOH
 
-    [Header("Sliders y Seed")]
+    [Header("Sliders, Seed y respectivas etiquetas")]
     [SerializeField] Slider virusAmountSlider;
+    [SerializeField] TMP_Text virusAmountLabel;
     [SerializeField] Slider resistanceAmountSlider;
+    [SerializeField] TMP_Text resistanceAmountLabel;
     [SerializeField] Slider difficultySlider;
+    [SerializeField] TMP_Text difficultyLabel;
     [SerializeField] Slider extensionWeightSlider;
+    [SerializeField] TMP_Text extensionWeightLabel;
     [SerializeField] Slider coverageWeightSlider;
+    [SerializeField] TMP_Text coverageWeightLabel;
     [SerializeField] Slider turnsWeightSlider;
+    [SerializeField] TMP_Text turnsWeightLabel;
     [SerializeField] Slider turnsDensitySlider;
+    [SerializeField] TMP_Text turnsDensityLabel;
     [SerializeField] TMP_InputField SeedText;
 
     [Header("Referencia a torretas")]
@@ -294,12 +301,46 @@ public class UIManager : MonoBehaviour
         UpdateElementsCounter();
     }
 
-    public void OnVirusAmountSliderChanged() { puzzle.SetVirusAmount(virusAmountSlider.value); }
-    public void OnResistanceAmountSliderChanged() { puzzle.SetResistanceAmount(resistanceAmountSlider.value); }
-    public void OnDiffiultySliderChanged() { puzzle.SetDifficulty(difficultySlider.value); }
-    public void OnExtensionWeightSliderChanged() { ea.SetExtensionWeight(extensionWeightSlider.value); }
-    public void OnCoverageWeightSliderChanged() { ea.SetCoverageWeight(coverageWeightSlider.value); }
-    public void OnTurnsWeightSliderChanged() { ea.SetTurnsWeight(turnsWeightSlider.value); }
-    public void OnTurnsDensitySliderChanged() { ea.SetTurnsDensity(turnsDensitySlider.value); }
+    public void OnVirusAmountSliderChanged()
+    {
+        puzzle.SetVirusAmount(virusAmountSlider.value);
+        virusAmountLabel.text = $": {virusAmountSlider.value:F0}";
+    }
+
+    public void OnResistanceAmountSliderChanged()
+    {
+        puzzle.SetResistanceAmount(resistanceAmountSlider.value);
+        resistanceAmountLabel.text = $": {resistanceAmountSlider.value:F1}";
+    }
+
+    public void OnDifficultySliderChanged()
+    {
+        puzzle.SetDifficulty(difficultySlider.value);
+        difficultyLabel.text = $": {difficultySlider.value:F2}";
+    }
+
+    public void OnExtensionWeightSliderChanged()
+    {
+        ea.SetExtensionWeight(extensionWeightSlider.value);
+        extensionWeightLabel.text = $": {extensionWeightSlider.value:F2}";
+    }
+
+    public void OnCoverageWeightSliderChanged()
+    {
+        ea.SetCoverageWeight(coverageWeightSlider.value);
+        coverageWeightLabel.text = $": {coverageWeightSlider.value:F2}";
+    }
+
+    public void OnTurnsWeightSliderChanged()
+    {
+        ea.SetTurnsWeight(turnsWeightSlider.value);
+        turnsWeightLabel.text = $": {turnsWeightSlider.value:F2}";
+    }
+
+    public void OnTurnsDensitySliderChanged()
+    {
+        ea.SetTurnsDensity(turnsDensitySlider.value);
+        turnsDensityLabel.text = $": {turnsDensitySlider.value:F2}";
+    }
     public void OnSeedChanged() { UnityEngine.Random.InitState(int.Parse(SeedText.text)); }
 }

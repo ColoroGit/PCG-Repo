@@ -48,12 +48,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 3
+  labelPrefab: {fileID: 2542084062776812438, guid: 1fece6e1db968994bb4b22d9b99d9965, type: 3}
+  labelOffset: {x: 0, y: 1.5, z: 0}
   path:
   - {x: 20.1, y: 9.6, z: 0}
   - {x: 20.5, y: -6.5, z: 0}
   - {x: 43.2, y: -6.5, z: 0}
   direction: {x: 0, y: 0, z: 0}
   type: 
+  HP: 0
+  progress: 0
 --- !u!212 &3113609426388959933
 SpriteRenderer:
   m_ObjectHideFlags: 0
