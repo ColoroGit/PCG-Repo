@@ -104,14 +104,7 @@ public class EA : MonoBehaviour
         {
             DirectionalMap individual = new DirectionalMap(extensionWeight, coverageWeight, turnsWeight, turnsDensity);
             population.Add(individual);
-
-            //DirectionalMap parent1 = population[Random.Range(0, mu)];
-            //DirectionalMap parent2 = population[Random.Range(0, mu)];
-            //DirectionalMap child = parent1.Crossover(parent2);
-            //child.Perturbate(Random.Range(1, child.dMap.Count));
-            //offspring.Add(child);
         }
-        //population.AddRange(offspring);
     }
 
     private void GenerateOffspring()
