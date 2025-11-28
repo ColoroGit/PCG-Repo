@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Unity.Collections;
 using UnityEngine;
 
 public class WFC : MonoBehaviour
@@ -10,6 +11,10 @@ public class WFC : MonoBehaviour
     public int outputWidth = 10;
     public int outputHeight = 10;
     public string outputFileName = "GeneratedLevel.txt";
+
+    [Header("Seed (0 = aleatoria)")]
+    public int manualSeed = 0; // Ingresa la seed manualmente aquí
+    [ReadOnly] public int usedSeed; // Última seed utilizada (solo lectura)
 
     private int[,] sampleGrid;
     private int sampleWidth, sampleHeight;
@@ -53,13 +58,16 @@ public class WFC : MonoBehaviour
         ExtractPatterns();
         FindCompatibilities();
         GenerateMap();
-        Debug.Log("WFC terminado. Archivo generado: " + outputFileName);
+        Debug.Log("WFC terminado. Archivo generado: " + outputFileName + " (Seed: " + usedSeed + ")");
     }
 
     void GenerateMap()
     {
-        int[,] outputGrid = RunWFC();
+        int seedToUse = manualSeed != 0 ? manualSeed : UnityEngine.Random.Range(1, int.MaxValue);
+        usedSeed = seedToUse;
+        int[,] outputGrid = RunWFC(seedToUse);
         SaveGridToTxt(outputGrid, outputFileName);
+        Debug.Log("Mapa generado con seed: " + usedSeed);
     }
 
     // 1. Parsear el sample a matriz
@@ -123,11 +131,11 @@ public class WFC : MonoBehaviour
     }
 
     // 4. Ejecutar WFC
-    int[,] RunWFC()
+    int[,] RunWFC(int seed)
     {
         int w = outputWidth;
         int h = outputHeight;
-        // Cada celda tiene un set de patrones posibles
+        // Cada celda tiene un set de patrones posibles        
         List<int>[,] wave = new List<int>[w, h];
         for (int y = 0; y < h; y++)
             for (int x = 0; x < w; x++)
@@ -137,11 +145,11 @@ public class WFC : MonoBehaviour
                     wave[x, y].Add(i);
             }
 
-        System.Random rng = new System.Random();
+        System.Random rng = new System.Random(seed);
 
         while (true)
         {
-            // Encuentra la celda con menor entropía (>1 posibilidades)
+            // Encuentra la celda con menor entropía (>1 posibilidades)            
             int minCount = int.MaxValue;
             List<(int x, int y)> minCells = new();
             for (int y = 0; y < h; y++)
@@ -159,7 +167,7 @@ public class WFC : MonoBehaviour
                 }
             if (minCount == int.MaxValue) break; // Todas colapsadas
 
-            // Selecciona una celda aleatoria de las de menor entropía
+            // Selecciona una celda aleatoria de las de menor entropía            
             var (cx, cy) = minCells[rng.Next(minCells.Count)];
 
             // Colapsa: elige un patrón posible según frecuencia
@@ -167,7 +175,7 @@ public class WFC : MonoBehaviour
             int chosen = WeightedRandomPattern(possible, rng);
             wave[cx, cy] = new List<int> { chosen };
 
-            // Propaga restricciones a vecinos
+            // Propaga restricciones a vecinos            
             Propagate(wave, cx, cy, w, h);
         }
 
@@ -176,14 +184,14 @@ public class WFC : MonoBehaviour
         for (int y = 0; y < h; y++)
             for (int x = 0; x < w; x++)
             {
-                int patIdx = wave[x, y][0];
+                int patIdx = wave[x, y].Count > 0 ? wave[x, y][0] : 0;
                 int[,] pat = patterns[patIdx].data;
                 grid[x, y] = pat[0, 0]; // Solo toma el valor superior izquierdo del patrón
             }
         return grid;
     }
 
-    // 5. Guardar la grilla en un .txt
+    // 5. Guardar la grilla en un .txt    
     void SaveGridToTxt(int[,] grid, string fileName)
     {
         string path = Path.Combine(Application.dataPath, fileName);
@@ -198,8 +206,6 @@ public class WFC : MonoBehaviour
         }
     }
 
-    // Utilidades
-
     int GetPatternHash(int[,] pat)
     {
         int hash = 17;
@@ -211,7 +217,7 @@ public class WFC : MonoBehaviour
 
     bool IsCompatible(Pattern a, Pattern b, string dir)
     {
-        // Compara los bordes según la dirección
+        // Compara los bordes según la dirección        
         if (dir == "up")
         {
             for (int i = 0; i < patternSize; i++)
@@ -241,7 +247,7 @@ public class WFC : MonoBehaviour
 
     int WeightedRandomPattern(List<int> possible, System.Random rng)
     {
-        // Elige un patrón según su frecuencia en el sample
+        // Elige un patrón según su frecuencia en el sample        
         int total = 0;
         foreach (int idx in possible)
             total += patterns[idx].count;
@@ -272,6 +278,13 @@ public class WFC : MonoBehaviour
                 var neighbor = wave[nx, ny];
                 int before = neighbor.Count;
                 neighbor.RemoveAll(idx => !HasCompatible(wave[cx, cy], idx, dir.Item3));
+                if (neighbor.Count == 0)
+                {
+                    // Si se queda sin opciones, restaura todos los patrones posibles
+                    for (int i = 0; i < patterns.Count; i++)
+                        neighbor.Add(i);
+                    Debug.LogWarning($"Celda ({nx},{ny}) quedó vacía, se restauran todos los patrones.");
+                }
                 if (neighbor.Count < before)
                     queue.Enqueue((nx, ny));
             }

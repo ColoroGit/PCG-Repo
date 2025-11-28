@@ -44,8 +44,6 @@ public class LevelDrawer : MonoBehaviour
             {
                 char c = lines[y][x];
 
-                Debug.Log($"Dibujando celda en ({x},{y}) con valor '{c}'");
-
                 int colorIndex;
                 if (!int.TryParse(c.ToString(), out colorIndex) || colorIndex < 0 || colorIndex >= colors.Length)
                 {

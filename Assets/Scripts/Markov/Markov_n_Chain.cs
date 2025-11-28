@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Unity.Collections;
 using UnityEngine;
 
 public class Markov_n_Chain : MonoBehaviour
@@ -8,6 +9,10 @@ public class Markov_n_Chain : MonoBehaviour
     public TextAsset textFile; // Arrastra tu archivo .txt aquí desde el editor
     public int n = 3; // Tamaño del n-grama (en columnas)
     public int levelSize = 10; // Cantidad de columnas a generar
+
+    [Header("Seed (dejar en 0 para aleatoria)")]
+    public int manualSeed = 0; // Ingresa la seed manualmente aquí
+    [ReadOnly] public int usedSeed; // Última seed utilizada (solo lectura)
 
     // Diccionario: patrón (n columnas) -> (columna siguiente -> ocurrencias)
     private Dictionary<string, Dictionary<string, int>> nGramCounts = new();
@@ -17,7 +22,7 @@ public class Markov_n_Chain : MonoBehaviour
     private int width;
     private int height;
     private List<string> columns = new();
-    
+
     private TextAsset lastTextFile;
     private int lastN;
 
@@ -31,7 +36,7 @@ public class Markov_n_Chain : MonoBehaviour
             ParseTextToColumns(textFile.text);
             DetectPatrons(n);
             CalculateProbabilities();
-            GenerateColumns(levelSize);
+            GenerateColumns(levelSize, manualSeed != 0 ? manualSeed : null);
         }
         else
         {
@@ -62,7 +67,10 @@ public class Markov_n_Chain : MonoBehaviour
                     return;
                 }
             }
-            GenerateColumns(levelSize);
+
+            // Si no hay seed manual, genera una aleatoria y la almacena
+            int? seedToUse = manualSeed != 0 ? manualSeed : (int?)UnityEngine.Random.Range(1, int.MaxValue);
+            GenerateColumns(levelSize, seedToUse);
         }
     }
 
@@ -72,7 +80,7 @@ public class Markov_n_Chain : MonoBehaviour
         height = lines.Length;
         width = lines[0].Length;
         columns.Clear();
-        
+
         for (int col = 0; col < width; col++)
         {
             char[] colChars = new char[height];
@@ -128,14 +136,19 @@ public class Markov_n_Chain : MonoBehaviour
         }
     }
 
-    public void GenerateColumns(int numColumns)
+    public void GenerateColumns(int numColumns, int? seed = null)
     {
         List<string> keys = new List<string>(nGramProbs.Keys);
         if (keys.Count == 0)
             return;
 
+        // Seed management
+        int actualSeed = seed ?? UnityEngine.Random.Range(1, int.MaxValue);
+        usedSeed = actualSeed;
+        System.Random rng = new System.Random(actualSeed);
+
         // Elige un patrón inicial aleatorio
-        string current = keys[Random.Range(0, keys.Count)];
+        string current = keys[rng.Next(keys.Count)];
         List<string> pattern = new List<string>(current.Split('|'));
 
         while (pattern.Count < numColumns)
@@ -144,7 +157,7 @@ public class Markov_n_Chain : MonoBehaviour
             if (!nGramProbs.ContainsKey(key) || nGramProbs[key].Count == 0)
                 break;
 
-            string nextCol = GetRandomNextColumn(nGramProbs[key]);
+            string nextCol = GetRandomNextColumn(nGramProbs[key], rng);
             pattern.Add(nextCol);
         }
 
@@ -154,7 +167,7 @@ public class Markov_n_Chain : MonoBehaviour
         try
         {
             File.WriteAllText(filePath, levelString);
-            Debug.Log("Nivel guardado en: " + filePath);
+            Debug.Log($"Nivel guardado en: {filePath} (Seed: {usedSeed})");
         }
         catch (IOException ex)
         {
@@ -162,11 +175,11 @@ public class Markov_n_Chain : MonoBehaviour
         }
     }
 
-    // Selecciona una columna según la probabilidad
-    private string GetRandomNextColumn(Dictionary<string, float> probs)
+    // Selecciona una columna según la probabilidad y la seed
+    private string GetRandomNextColumn(Dictionary<string, float> probs, System.Random rng)
     {
-        float rand = Random.value;
-        float cumulative = 0f;
+        double rand = rng.NextDouble();
+        double cumulative = 0.0;
         foreach (var pair in probs)
         {
             cumulative += pair.Value;
