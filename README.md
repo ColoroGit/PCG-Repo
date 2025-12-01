@@ -42,8 +42,8 @@ Once the program is open and running, follow these instructions to modify the pa
 To test the second part of the project, corresponding to neural networks, follow these instructions:
 
 1. Select one of the links below to go to the project in Google Colab:<ol type="a">
-     <li>Neural Network for classifying maps.</li>
-     <li>WGAN-GP for generating maps.</li>
+     <li>[Neural Network for classifying maps](https://colab.research.google.com/drive/1agOQzelorvxiRExiB1Zlt2PF87gJBFLc?usp=sharing).</li>
+     <li>[WGAN-GP for generating maps](https://colab.research.google.com/drive/1lzx2fOt8yN3lCafcwBS3ytNXvRnuJoLv?usp=sharing).</li>
    </ol>
 2. Once inside the project, select the “Run all” option in the taskbar.
 3. If you wish, you can adjust parameters such as strides or padding to experiment with different configurations.
